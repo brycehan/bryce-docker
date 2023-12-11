@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: WORKLOAD
+  namespace: NAMESPACE
+  labels:
+    workload.user.cattle.io/workloadselector: apps.deployment-NAMESPACE-WORKLOAD
+spec:
+  replicas: 1
+  minReadySeconds: minReadySecondsValue
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: apps.deployment-NAMESPACE-WORKLOAD
+  template:
+    metadata:
+      labels:
+        workload.user.cattle.io/workloadselector: apps.deployment-NAMESPACE-WORKLOAD
+      namespace: NAMESPACE
+    spec:
+      containers:
+        - image: IMAGE_NAME
+          name: CONTAINER_NAME
+          ports:
+            - containerPort: PORT
+              name: PORTtcp
+              protocol: TCP
+          env:
+            - name: CI_PIPELINE_ID
+              value: CI_PIPELINE_ID_VALUE
+            - name: spring_profiles_active
+              value: ACTIVE
+      restartPolicy: Always
+      terminationGracePeriodSeconds: terminationGracePeriodSecondsValue

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+
+  <!-- 服务器配置 -->
+  <servers>
+    <server>
+      <id>releases</id>
+      <username>admin</username>
+      <password>bryce@2023</password>
+    </server>
+    <server>
+      <id>snapshots</id>
+      <username>admin</username>
+      <password>bryce@2023</password>
+    </server>
+  </servers>
+
+  <!-- maven镜像配置 -->
+  <mirrors>
+    <mirror>
+      <id>nexus</id>
+      <mirrorOf>*</mirrorOf>
+      <name>Nexus私服</name>
+      <url>http://nexus.brycehan.com/repository/maven-public/</url>
+    </mirror>
+  </mirrors>
+
+</settings>

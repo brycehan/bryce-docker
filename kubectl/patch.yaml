@@ -1,0 +1,14 @@
+spec:
+  minReadySeconds: minReadySecondsValue
+  template:
+    spec:
+      containers:
+        - image: IMAGE_NAME
+          name: CONTAINER_NAME
+          env:
+            - name: CI_PIPELINE_ID
+              value: CI_PIPELINE_ID_VALUE
+            - name: spring_profiles_active
+              value: ACTIVE
+      restartPolicy: Always
+      terminationGracePeriodSeconds: terminationGracePeriodSecondsValue

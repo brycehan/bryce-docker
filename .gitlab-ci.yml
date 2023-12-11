@@ -1,0 +1,65 @@
+stages:
+  - build
+
+variables:
+  # buildah 使用 vfs
+  STORAGE_DRIVER: vfs
+  HARBOR_URL: core.harbor.brycehan.com
+  HARBOR_USERNAME: admin
+
+build-maven:
+  stage: build
+  image: quay.io/buildah/stable
+  when: always
+  only:
+    - main
+  variables:
+    IMAGE_NAME: $HARBOR_URL/bryce-docker/maven:latest
+  before_script:
+    - cat buildah/password.txt | buildah login -u $HARBOR_USERNAME --password-stdin $HARBOR_URL --tls-verify=false
+    - cd maven
+  script:
+    - buildah build -f Dockerfile -t $IMAGE_NAME .
+    - buildah push --tls-verify=false $IMAGE_NAME
+  after_script:
+    - cd ..
+  tags:
+    - bryce-runner
+
+build-buildah:
+  stage: build
+  image: quay.io/buildah/stable
+  when: always
+  only:
+    - main
+  variables:
+    IMAGE_NAME: $HARBOR_URL/bryce-docker/buildah:latest
+  before_script:
+    - cat buildah/password.txt | buildah login -u $HARBOR_USERNAME --password-stdin $HARBOR_URL --tls-verify=false
+    - cd buildah
+  script:
+    - buildah build -f Dockerfile -t $IMAGE_NAME .
+    - buildah push --tls-verify=false $IMAGE_NAME
+  after_script:
+    - cd ..
+  tags:
+    - bryce-runner
+
+build-kubectl:
+  stage: build
+  image: quay.io/buildah/stable
+  when: always
+  only:
+    - main
+  variables:
+    IMAGE_NAME: $HARBOR_URL/bryce-docker/kubectl:latest
+  before_script:
+    - cat buildah/password.txt | buildah login -u $HARBOR_USERNAME --password-stdin $HARBOR_URL --tls-verify=false
+    - cd kubectl
+  script:
+    - buildah build -f Dockerfile -t $IMAGE_NAME .
+    - buildah push --tls-verify=false $IMAGE_NAME
+  after_script:
+    - cd ..
+  tags:
+    - bryce-runner
