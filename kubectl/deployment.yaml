@@ -6,7 +6,7 @@ metadata:
   labels:
     workload.user.cattle.io/workloadselector: apps.deployment-NAMESPACE-WORKLOAD
 spec:
-  replicas: 1
+  replicas: REPLICAS
   minReadySeconds: minReadySecondsValue
   selector:
     matchLabels:

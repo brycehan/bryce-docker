@@ -4,7 +4,7 @@ stages:
 variables:
   # buildah 使用 vfs
   STORAGE_DRIVER: vfs
-  HARBOR_URL: core.harbor.brycehan.com
+  HARBOR_HOST: core.harbor.brycehan.com
   HARBOR_USERNAME: admin
 
 build-maven:
@@ -14,9 +14,9 @@ build-maven:
   only:
     - main
   variables:
-    IMAGE_NAME: $HARBOR_URL/bryce-docker/maven:latest
+    IMAGE_NAME: $HARBOR_HOST/bryce-docker/maven:latest
   before_script:
-    - cat buildah/password.txt | buildah login -u $HARBOR_USERNAME --password-stdin $HARBOR_URL --tls-verify=false
+    - cat buildah/password.txt | buildah login -u $HARBOR_USERNAME --password-stdin $HARBOR_HOST --tls-verify=false
     - cd maven
   script:
     - buildah build -f Dockerfile -t $IMAGE_NAME .
@@ -33,9 +33,9 @@ build-buildah:
   only:
     - main
   variables:
-    IMAGE_NAME: $HARBOR_URL/bryce-docker/buildah:latest
+    IMAGE_NAME: $HARBOR_HOST/bryce-docker/buildah:latest
   before_script:
-    - cat buildah/password.txt | buildah login -u $HARBOR_USERNAME --password-stdin $HARBOR_URL --tls-verify=false
+    - cat buildah/password.txt | buildah login -u $HARBOR_USERNAME --password-stdin $HARBOR_HOST --tls-verify=false
     - cd buildah
   script:
     - buildah build -f Dockerfile -t $IMAGE_NAME .
@@ -52,9 +52,9 @@ build-kubectl:
   only:
     - main
   variables:
-    IMAGE_NAME: $HARBOR_URL/bryce-docker/kubectl:latest
+    IMAGE_NAME: $HARBOR_HOST/bryce-docker/kubectl:latest
   before_script:
-    - cat buildah/password.txt | buildah login -u $HARBOR_USERNAME --password-stdin $HARBOR_URL --tls-verify=false
+    - cat buildah/password.txt | buildah login -u $HARBOR_USERNAME --password-stdin $HARBOR_HOST --tls-verify=false
     - cd kubectl
   script:
     - buildah build -f Dockerfile -t $IMAGE_NAME .

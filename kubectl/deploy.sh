@@ -7,6 +7,7 @@ help () {
   echo ' -w: 应用部署名称 必需'
   echo ' -i: 部署镜像名称 必需'
   echo ' -c: 容器名称 默认 container-0'
+  echo ' -r: 副本数replicas 默认 1'
   echo ' -h: 应用访问域名 必须'
   echo ' -p: 容器暴露端口 默认 80'
   echo ' -a: 启用环境 默认 prod'
@@ -25,6 +26,19 @@ if [ "$1" == '' ]; then
   exit;
 fi
 
+# 默认值
+NAMESPACE=default
+CONTAINER_NAME=container-0
+REPLICAS=1
+PORT=80
+ACTIVE=prod
+minReadySecondsValue=20
+terminationGracePeriodSecondsValue=30
+# 默认值为空
+WORKLOAD=''
+IMAGE_NAME=''
+HOST=''
+
 ARGS=$*
 for ARG in $ARGS;
 do
@@ -35,6 +49,7 @@ do
   -w) WORKLOAD=$value;;
   -i) IMAGE_NAME=$value;;
   -c) CONTAINER_NAME=$value;;
+  -r) REPLICAS=$value;;
   -h) HOST=$value;;
   -p) PORT=$value;;
   -a) ACTIVE=$value;;
@@ -44,18 +59,13 @@ do
   esac
 done
 
-NAMESPACE=${NAMESPACE:-default}
-CONTAINER_NAME=${IMAGE_NAME_VALUE:-container-0}
-PORT=${PORT:-80}
-ACTIVE=${ACTIVE:-prod}
-minReadySecondsValue=${minReadySecondsValue:-20}
-terminationGracePeriodSecondsValue=${terminationGracePeriodSecondsValue:-30}
-
 initDeploymentParams() {
+  cp /deployment.yaml /opt/deployment.yaml
   sed -i "s=NAMESPACE=${NAMESPACE}=g" /opt/deployment.yaml
   sed -i "s=WORKLOAD=${WORKLOAD}=g" /opt/deployment.yaml
   sed -i "s=IMAGE_NAME=${IMAGE_NAME}=g" /opt/deployment.yaml
   sed -i "s=CONTAINER_NAME=${CONTAINER_NAME}=g" /opt/deployment.yaml
+  sed -i "s=REPLICAS=${REPLICAS}=g" /opt/deployment.yaml
   sed -i "s=PORT=${PORT}=g" /opt/deployment.yaml
   sed -i "s=CI_PIPELINE_ID_VALUE=deployment_${CI_PIPELINE_ID}=g" /opt/deployment.yaml
   sed -i "s=ACTIVE=${ACTIVE}=g" /opt/deployment.yaml
@@ -64,6 +74,7 @@ initDeploymentParams() {
 }
 
 initPatchParams() {
+  cp /patch.yaml /opt/patch.yaml
   sed -i "s=IMAGE_NAME=${IMAGE_NAME}=g" /opt/patch.yaml
   sed -i "s=CONTAINER_NAME=${CONTAINER_NAME}=g" /opt/patch.yaml
   sed -i "s=CI_PIPELINE_ID_VALUE=deployment_${CI_PIPELINE_ID}=g" /opt/patch.yaml
@@ -73,19 +84,21 @@ initPatchParams() {
 }
 
 initServiceParams() {
+  cp /service.yaml /opt/service.yaml
   sed -i "s=NAMESPACE=${NAMESPACE}=g" /opt/service.yaml
   sed -i "s=WORKLOAD=${WORKLOAD}=g" /opt/service.yaml
   sed -i "s=PORT=${PORT}=g" /opt/service.yaml
 }
 
 initIngressParams() {
+  cp /ingress.yaml /opt/ingress.yaml
   sed -i "s=NAMESPACE=${NAMESPACE}=g" /opt/ingress.yaml
   sed -i "s=WORKLOAD=${WORKLOAD}=g" /opt/ingress.yaml
   sed -i "s=HOST=${HOST}=g" /opt/ingress.yaml
   sed -i "s=PORT=${PORT}=g" /opt/ingress.yaml
 }
 
-deploymentSize=$(kubectl get deployment "$WORKLOAD"  -n "$NAMESPACE" | awk 'END{print NR}')
+deploymentSize=$(kubectl get deployment "$WORKLOAD"  -n "$NAMESPACE" --ignore-not-found=true | awk 'END{print NR}')
 
 echo -e "\033[32;1m ------------------------------------------------------------ \033[0m"
 echo -e "\033[32;1m                       |  开始部署项目  |                       \033[0m"
@@ -100,9 +113,11 @@ if [ "$deploymentSize" -eq 0 ];then
   # 创建service
   kubectl apply -f /opt/service.yaml
 
-  initIngressParams;
-  # 创建ingress
-  kubectl apply -f /opt/ingress.yaml
+  if [ -n "$HOST" ];then
+    initIngressParams;
+    # 创建ingress
+    kubectl apply -f /opt/ingress.yaml
+  fi
 else
   initPatchParams;
   # 更新patch

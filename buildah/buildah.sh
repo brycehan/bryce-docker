@@ -34,7 +34,7 @@ echo -e "\033[32;1m ------------------------------------------------------------
 echo -e "\033[32;1m                       |  开始打包上传镜像  |                       \033[0m"
 echo -e "\033[32;1m ------------------------------------------------------------ \033[0m"
 
-cat < /password.txt | buildah login -u "$HARBOR_USERNAME" --password-stdin "$HARBOR_URL" --tls-verify=false
+cat < /password.txt | buildah login -u "$HARBOR_USERNAME" --password-stdin "$HARBOR_HOST" --tls-verify=false
 buildah build -f "$DOCKER_FILE" -t "$IMAGE_NAME" .
 buildah push --tls-verify=false "$IMAGE_NAME"
 
